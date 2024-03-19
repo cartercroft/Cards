@@ -6,21 +6,26 @@ namespace Cards.Cards
 {
     public class DeckOfCards
     {
-        private Stack<Card> stackOfCards;
+        private List<Card> _stackOfCards;
+
         public DeckOfCards(DataLoader loader)
         {
-            List<Card> cards = loader.DefaultDeck;
-            cards.Shuffle();
-
-            stackOfCards = new Stack<Card>(cards);
+            _stackOfCards = loader.DefaultDeck;
+            _stackOfCards.Shuffle();
+        }
+        public void Shuffle()
+        {
+            _stackOfCards.Shuffle();
         }
         public Card DrawCard()
         {
-            return stackOfCards.Pop();
+            var first = _stackOfCards.First();
+            _stackOfCards.RemoveAt(0);
+            return first;
         }
         public bool IsEmpty()
         {
-            return stackOfCards.Count == 0;
+            return _stackOfCards.Count == 0;
         }
     }
 }

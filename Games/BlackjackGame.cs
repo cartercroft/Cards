@@ -12,6 +12,7 @@ namespace Cards.Games
 {
     public class BlackjackGame
     {
+        const int SHUFFLES_PER_DECK = 5;
         private BlackjackHand _playerHand;
         private BlackjackHand _dealerHand;
         private DeckOfCards _deckOfCards;
@@ -19,9 +20,14 @@ namespace Cards.Games
         private bool _isPlaying;
         public BlackjackGame(DataLoader loader)
         {
+            Console.Clear();
             _playerHand = new BlackjackHand();
             _dealerHand = new BlackjackHand();
             _deckOfCards = new DeckOfCards(loader);
+            for(int i = 0; i <  SHUFFLES_PER_DECK; i++)
+            {
+                _deckOfCards.Shuffle();
+            }
             _isPlaying = true;
             InitializeHands();
         }
@@ -58,7 +64,7 @@ namespace Cards.Games
         private void DealDealerCard()
         {
             var card = _deckOfCards.DrawCard();
-            if(_dealerHand.Cards.Count == 1)
+            if(_dealerHand.Cards.Count == 0)
             {
                 _dealerUpCard = new BlackjackCard(card.CardValue);
             }
@@ -88,6 +94,10 @@ namespace Cards.Games
             {
                 Console.WriteLine($"Winner! You have: {_playerHand.Score}. Dealer had {_dealerHand.Score}.");
             }
+            else if(_dealerHand.Score == _playerHand.Score)
+            {
+                Console.WriteLine($"Push, both players have {_dealerHand.Score}.");
+            }
             else
             {
                 Console.WriteLine($"You lose.");
@@ -100,18 +110,18 @@ namespace Cards.Games
             while(_dealerHand.Score < 17)
             {
                 DealDealerCard();
-                Console.WriteLine($"Dealer Has {_dealerHand.Score}.");
             }
         }
         private void DisplayHand(BlackjackHand hand)
         {
-            Console.WriteLine(string.Join(",", hand.Cards.Select(x => x.ToString())));
-            Console.WriteLine($"Score: {hand.ScoreDisplay}.");
+            Console.WriteLine($"\t{string.Join(",", hand.Cards.Select(x => x.ToString()))}");
+            Console.WriteLine($"Score: \r\n\t{hand.ScoreDisplay}.");
         }
         private void DisplayHands()
         {
             Console.WriteLine("Player has:");
             DisplayHand(_playerHand);
+            Console.WriteLine();
             Console.WriteLine("Dealer has:");
             DisplayHand(_dealerHand);
         }
