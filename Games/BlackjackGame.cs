@@ -1,4 +1,5 @@
 ﻿using Cards.Cards;
+using Cards.Enums;
 using Cards.Extensions;
 using Cards.Hands;
 using System;
@@ -15,16 +16,14 @@ namespace Cards.Games
         private BlackjackHand _dealerHand;
         private DeckOfCards _deckOfCards;
         private BlackjackCard _dealerUpCard;
-        private bool _isDealerBust => _dealerHand.Score > 21;
-        private bool _isPlayerBust => _playerHand.Score > 21;
         private bool _isPlaying;
         public BlackjackGame(DataLoader loader)
         {
             _playerHand = new BlackjackHand();
             _dealerHand = new BlackjackHand();
             _deckOfCards = new DeckOfCards(loader);
-            InitializeHands();
             _isPlaying = true;
+            InitializeHands();
         }
 
         public BlackjackCard DealerUpCard => _dealerUpCard;
@@ -37,6 +36,19 @@ namespace Cards.Games
             DealDealerCard();
             DealPlayerCard();
             DealDealerCard();
+
+            if(_dealerUpCard.CardValue == CardValue.Ace)
+            {
+                //offer insurance
+            }
+            else if (_dealerUpCard.NumberValue == 10)
+            {
+                //Check for BJ
+            }
+            if (_playerHand.IsBlackjack)
+            {
+                Stand();
+            }
         }
 
         private void DealPlayerCard()
@@ -55,7 +67,7 @@ namespace Cards.Games
         public void Hit()
         {
             DealPlayerCard();
-            if(_isPlayerBust)
+            if(_playerHand.IsBusted)
             {
                 Console.WriteLine($"Bust! Score: {_playerHand.Score}.");
                 DisplayHands();
@@ -68,10 +80,17 @@ namespace Cards.Games
         }
         public void Stand()
         {
-            DealerDrawToSeventeen();
-            if(_isDealerBust || _playerHand.Score > _dealerHand.Score)
+            if (!_playerHand.IsBlackjack)
+            {
+                DealerDrawToSeventeen();
+            }
+            if(_dealerHand.IsBusted || _playerHand.Score > _dealerHand.Score)
             {
                 Console.WriteLine($"Winner! You have: {_playerHand.Score}. Dealer had {_dealerHand.Score}.");
+            }
+            else
+            {
+                Console.WriteLine($"You lose.");
             }
             DisplayHands();
             _isPlaying = false;
@@ -86,7 +105,7 @@ namespace Cards.Games
         }
         private void DisplayHand(BlackjackHand hand)
         {
-            Console.WriteLine(string.Join(",", hand.Cards.Select(x => $"{x.CardValue} of {EnumExtensions.GetSuitSymbol(x.CardSuit)}")));
+            Console.WriteLine(string.Join(",", hand.Cards.Select(x => x.ToString())));
             Console.WriteLine($"Score: {hand.ScoreDisplay}.");
         }
         private void DisplayHands()

@@ -20,7 +20,7 @@ namespace Cards.Cards
         public virtual int NumberValue => (int)CardValue;
         public override string ToString()
         {
-            return $"{CardValue} {EnumExtensions.GetSuitSymbol(CardSuit)}";
+            return $"{CardValue} {CardSuit.GetSuitSymbol()}";
         }
     }
 }
