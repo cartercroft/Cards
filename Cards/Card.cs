@@ -1,5 +1,4 @@
 ﻿using Cards.Enums;
-using Cards.Extensions;
 
 namespace Cards.Cards
 {
@@ -10,7 +9,7 @@ namespace Cards.Cards
             CardSuit = CardSuit.None;
             CardValue = CardValue.None;
         }
-        public Card(CardSuit suit, CardValue value) 
+        public Card(CardValue value, CardSuit suit) 
         {
             CardValue = value;
             CardSuit = suit;
@@ -20,7 +19,7 @@ namespace Cards.Cards
         public virtual int NumberValue => (int)CardValue;
         public override string ToString()
         {
-            return $"{CardValue} {CardSuit.GetSuitSymbol()}";
+            return $"{CardValue} {(char)CardSuit}";
         }
     }
 }

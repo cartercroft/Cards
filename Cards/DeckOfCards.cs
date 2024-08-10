@@ -1,4 +1,5 @@
 ﻿using Cards.Cards;
+using Cards.Enums;
 using Cards.Extensions;
 using Newtonsoft.Json;
 
@@ -22,6 +23,10 @@ namespace Cards.Cards
             var first = _stackOfCards.First();
             _stackOfCards.RemoveAt(0);
             return first;
+        }
+        public Card? GetCard(CardSuit suit, CardValue value)
+        {
+            return _stackOfCards.FirstOrDefault(c => c.CardSuit == suit && c.CardValue == value);
         }
         public bool IsEmpty()
         {

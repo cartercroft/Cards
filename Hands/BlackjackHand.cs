@@ -21,7 +21,7 @@ namespace Cards.Hands
         public override void DealCard(Card card)
         {
             base.DealCard(card);
-            BlackjackCard bjCard = new BlackjackCard(card.CardValue);
+            BlackjackCard bjCard = new BlackjackCard(card.CardValue, card.CardSuit);
             _score += bjCard.NumberValue;
             if (card.CardValue.Equals(CardValue.Ace))
             {

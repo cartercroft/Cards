@@ -5,11 +5,11 @@ namespace Cards.Cards
     public class BlackjackCard : Card
     {
         private int _numberValue;
-        public BlackjackCard()
+        public BlackjackCard() : base()
         {
             _numberValue = 0;
         }
-        public BlackjackCard(CardValue value)
+        public BlackjackCard(CardValue value, CardSuit suit) : base(value, suit)
         {
             SetNumberValue(value);
         }

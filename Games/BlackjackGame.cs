@@ -1,34 +1,32 @@
 ﻿using Cards.Cards;
 using Cards.Enums;
-using Cards.Extensions;
 using Cards.Hands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static Cards.Helpers.ConsoleHelper;
 
 namespace Cards.Games
 {
     public class BlackjackGame
     {
-        const int SHUFFLES_PER_DECK = 5;
+        private const int SHUFFLES_PER_DECK = 5;
         private BlackjackHand _playerHand;
         private BlackjackHand _dealerHand;
         private DeckOfCards _deckOfCards;
         private BlackjackCard _dealerUpCard;
         private bool _isPlaying;
+        private bool _tookInsurance;
         public BlackjackGame(DataLoader loader)
         {
             Console.Clear();
             _playerHand = new BlackjackHand();
             _dealerHand = new BlackjackHand();
             _deckOfCards = new DeckOfCards(loader);
-            for(int i = 0; i <  SHUFFLES_PER_DECK; i++)
+            _dealerUpCard = null!;
+            for(int i = 0; i < SHUFFLES_PER_DECK; i++)
             {
                 _deckOfCards.Shuffle();
             }
             _isPlaying = true;
+            _tookInsurance = false;
             InitializeHands();
         }
 
@@ -46,17 +44,51 @@ namespace Cards.Games
             if(_dealerUpCard.CardValue == CardValue.Ace)
             {
                 //offer insurance
+                OfferInsurance();
             }
             else if (_dealerUpCard.NumberValue == 10)
             {
-                //Check for BJ
+                CheckForDealerBlackjack();
             }
             if (_playerHand.IsBlackjack)
             {
                 Stand();
             }
         }
-
+        private void CheckForDealerBlackjack()
+        {
+            if (_dealerHand.IsBlackjack)
+            {
+                ShowResults();
+            }
+        }
+        private void OfferInsurance()
+        {
+            while (true)
+            {
+                string userInput = PromptUser($"Dealer has {_dealerUpCard.NumberValue}. Player has {_playerHand.ScoreDisplay}. Would player like to accept insurance? (y/n)");
+                if (userInput == "y")
+                {
+                    _tookInsurance = true;
+                    if (_dealerHand.IsBlackjack)
+                    {
+                        Stand();
+                        //Pay 2 to 1
+                    }
+                    Console.WriteLine("Wow, player took the sucker bet and won?");
+                    break;
+                }
+                if(userInput == "n")
+                {
+                    if (_dealerHand.IsBlackjack)
+                    {
+                        Console.WriteLine("Dealer has blackjack.");
+                        Stand();
+                    }
+                    break;
+                }
+            }
+        }
         private void DealPlayerCard()
         {
             _playerHand.DealCard(_deckOfCards.DrawCard());
@@ -64,50 +96,15 @@ namespace Cards.Games
         private void DealDealerCard()
         {
             var card = _deckOfCards.DrawCard();
-            if(_dealerHand.Cards.Count == 0)
+            if (!_dealerHand.Cards.Any())
             {
-                _dealerUpCard = new BlackjackCard(card.CardValue);
+                _dealerUpCard = new BlackjackCard(card.CardValue, card.CardSuit);
             }
             _dealerHand.DealCard(card);
         }
-        public void Hit()
-        {
-            DealPlayerCard();
-            if(_playerHand.IsBusted)
-            {
-                Console.WriteLine($"Bust! Score: {_playerHand.Score}.");
-                DisplayHands();
-                _isPlaying = false;
-            }
-            else if(_playerHand.Score == 21)
-            {
-                Stand();
-            }
-        }
-        public void Stand()
-        {
-            if (!_playerHand.IsBlackjack)
-            {
-                DealerDrawToSeventeen();
-            }
-            if(_dealerHand.IsBusted || _playerHand.Score > _dealerHand.Score)
-            {
-                Console.WriteLine($"Winner! You have: {_playerHand.Score}. Dealer had {_dealerHand.Score}.");
-            }
-            else if(_dealerHand.Score == _playerHand.Score)
-            {
-                Console.WriteLine($"Push, both players have {_dealerHand.Score}.");
-            }
-            else
-            {
-                Console.WriteLine($"You lose.");
-            }
-            DisplayHands();
-            _isPlaying = false;
-        }
         private void DealerDrawToSeventeen()
         {
-            while(_dealerHand.Score < 17)
+            while (_dealerHand.Score < 17)
             {
                 DealDealerCard();
             }
@@ -124,6 +121,49 @@ namespace Cards.Games
             Console.WriteLine();
             Console.WriteLine("Dealer has:");
             DisplayHand(_dealerHand);
+        }
+        private void ShowResults()
+        {
+            if (_tookInsurance && _dealerHand.IsBlackjack)
+            {
+                Console.WriteLine("Dealer had blackjack. Player wins 2 to 1 on the insurance bet.");
+            }
+            if (_dealerHand.IsBusted || _playerHand.Score > _dealerHand.Score)
+            {
+                Console.WriteLine($"Winner! Player has: {_playerHand.Score}. Dealer has: {_dealerHand.Score}.");
+            }
+            else if (_dealerHand.Score == _playerHand.Score)
+            {
+                Console.WriteLine($"Push, dealer and player both have {_dealerHand.Score}.");
+            }
+            else
+            {
+                Console.WriteLine($"Player loses.");
+            }
+            DisplayHands();
+            _isPlaying = false;
+        }
+        public void Hit()
+        {
+            DealPlayerCard();
+            if(_playerHand.IsBusted)
+            {
+                Console.WriteLine($"Bust!");
+                DisplayHands();
+                _isPlaying = false;
+            }
+            else if(_playerHand.Score == 21)
+            {
+                Stand();
+            }
+        }
+        public void Stand()
+        {
+            if (!_playerHand.IsBlackjack)
+            {
+                DealerDrawToSeventeen();
+            }
+            ShowResults();
         }
     }
 }
