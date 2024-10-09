@@ -5,31 +5,40 @@ namespace Cards.GamePlayers
 {
     public class BlackjackGamePlayer
     {
-        private BlackjackGame _game;
-        private DataLoader _loader;
+        private BlackjackGame _currentGame;
+        private readonly DataLoader _loader;
         private string _lastUserInput;
+        private Dictionary<string, Action<BlackjackGame>> _userActionsMap;
+        public BlackjackGamePlayer()
+        {
+            _loader = null!;
+            _currentGame = null!;
+            _lastUserInput = "";
+            InitializeUserActionsMap();
+        }
         public BlackjackGamePlayer(DataLoader loader)
         {
             _loader = loader;
-            _game = null!;
+            _currentGame = null!;
             _lastUserInput = "";
+            InitializeUserActionsMap();
         }
 
         public void Play()
         {
             while(true)
             {
-                _game = new BlackjackGame(_loader);
-                while (_game.IsPlaying)
+                _currentGame = new BlackjackGame(_loader);
+                while (_currentGame.IsPlaying)
                 {
-                    _lastUserInput = PromptUser($"You have: {_game.PlayerScore}. Dealer has: {_game.DealerUpCard.NumberValue}. 'h' for Hit, 's' for Stand.");
-                    if (_lastUserInput == "s")
+                    _lastUserInput = PromptUser($"You have: {_currentGame.PlayerScore}. Dealer has: {_currentGame.DealerUpCard.NumberValue}. 'h' for Hit, 's' for Stand.");
+                    if (!_userActionsMap.ContainsKey(_lastUserInput))
                     {
-                        _game.Stand();
+                        Console.WriteLine("Invalid input.");
                     }
-                    else if (_lastUserInput == "h")
+                    else
                     {
-                        _game.Hit();
+                        _userActionsMap[_lastUserInput](_currentGame);
                     }
                 }
                 _lastUserInput = PromptUser("Press enter to start a new game, enter 'x' to quit.");
@@ -38,6 +47,15 @@ namespace Cards.GamePlayers
                 {
                     return;
                 }
+            }
+        }
+        private void InitializeUserActionsMap()
+        {
+            if(_userActionsMap == null)
+            {
+                _userActionsMap = new();
+                _userActionsMap.Add("s", (game) => game.Stand());
+                _userActionsMap.Add("h", (game) => game.Hit());
             }
         }
     }

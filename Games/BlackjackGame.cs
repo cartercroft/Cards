@@ -8,9 +8,9 @@ namespace Cards.Games
     public class BlackjackGame
     {
         private const int SHUFFLES_PER_DECK = 5;
-        private BlackjackHand _playerHand;
-        private BlackjackHand _dealerHand;
-        private DeckOfCards _deckOfCards;
+        private readonly BlackjackHand _playerHand;
+        private readonly BlackjackHand _dealerHand;
+        private readonly DeckOfCards _deckOfCards;
         private BlackjackCard _dealerUpCard;
         private bool _isPlaying;
         private bool _tookInsurance;
@@ -96,7 +96,7 @@ namespace Cards.Games
         private void DealDealerCard()
         {
             var card = _deckOfCards.DrawCard();
-            if (!_dealerHand.Cards.Any())
+            if (_dealerHand.Cards.Count == 0)
             {
                 _dealerUpCard = new BlackjackCard(card.CardValue, card.CardSuit);
             }
@@ -109,7 +109,7 @@ namespace Cards.Games
                 DealDealerCard();
             }
         }
-        private void DisplayHand(BlackjackHand hand)
+        private static void DisplayHand(BlackjackHand hand)
         {
             Console.WriteLine($"\t{string.Join(",", hand.Cards.Select(x => x.ToString()))}");
             Console.WriteLine($"Score: \r\n\t{hand.ScoreDisplay}.");

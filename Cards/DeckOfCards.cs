@@ -1,13 +1,11 @@
-﻿using Cards.Cards;
-using Cards.Enums;
+﻿using Cards.Enums;
 using Cards.Extensions;
-using Newtonsoft.Json;
 
 namespace Cards.Cards
 {
     public class DeckOfCards
     {
-        private List<Card> _stackOfCards;
+        private readonly List<Card> _stackOfCards;
 
         public DeckOfCards(DataLoader loader)
         {
