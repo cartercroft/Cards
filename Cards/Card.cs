@@ -19,7 +19,9 @@ namespace Cards.Cards
         public virtual int NumberValue => (int)CardValue;
         public override string ToString()
         {
-            return $"{CardValue} {(char)CardSuit}";
+            //https://theasciicode.com.ar/ascii-control-characters/start-of-header-ascii-code-1.html
+            //offset ascii value by 3 to get suits
+            return $"{CardValue} {(char)(CardSuit + 3)}";
         }
     }
 }
