@@ -12,7 +12,6 @@ namespace Cards.Hands
             _score = 0;    
             _isSoft = false;
         }
-        public bool IsSoft => _isSoft;
         public bool IsBusted => !_isSoft && _score > 21;
         public bool IsBlackjack => Cards.Count == 2 && Score == 21;
         public int Score => _score;

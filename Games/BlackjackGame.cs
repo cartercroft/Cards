@@ -36,14 +36,14 @@ namespace Cards.Games
         public string DealerScore => _dealerHand.ScoreDisplay;
         private void InitializeHands()
         {
-            DealPlayerCard();
-            DealDealerCard();
-            DealPlayerCard();
-            DealDealerCard();
+            DealCard(ref _playerHand);
+            DealCard(ref _dealerHand, true);
+            DealCard(ref _playerHand);
+            DealCard(ref _dealerHand);
 
-            if(_dealerUpCard.CardValue == CardValue.Ace)
+
+            if (_dealerUpCard.CardValue == CardValue.Ace)
             {
-                //offer insurance
                 OfferInsurance();
             }
             else if (_dealerUpCard.NumberValue == 10)
@@ -59,7 +59,7 @@ namespace Cards.Games
         {
             if (_dealerHand.IsBlackjack)
             {
-                ShowResults();
+                EndHand();
             }
         }
         private void OfferInsurance()
@@ -89,24 +89,20 @@ namespace Cards.Games
                 }
             }
         }
-        private void DealPlayerCard()
+        private void DealCard(ref BlackjackHand hand, bool isUpCard = false)
         {
-            _playerHand.DealCard(_deckOfCards.DrawCard());
-        }
-        private void DealDealerCard()
-        {
-            var card = _deckOfCards.DrawCard();
-            if (!_dealerHand.Cards.Any())
+            Card card = _deckOfCards.DrawCard();
+            if(isUpCard)
             {
                 _dealerUpCard = new BlackjackCard(card.CardValue, card.CardSuit);
             }
-            _dealerHand.DealCard(card);
+            hand.DealCard(card);
         }
         private void DealerDrawToSeventeen()
         {
             while (_dealerHand.Score < 17)
             {
-                DealDealerCard();
+                DealCard(ref _dealerHand);
             }
         }
         private void DisplayHand(BlackjackHand hand)
@@ -122,35 +118,34 @@ namespace Cards.Games
             Console.WriteLine("Dealer has:");
             DisplayHand(_dealerHand);
         }
-        private void ShowResults()
+        private void EndHand()
         {
             if (_tookInsurance && _dealerHand.IsBlackjack)
             {
-                Console.WriteLine("Dealer had blackjack. Player wins 2 to 1 on the insurance bet.");
+                HandleInsuranceWin();
             }
-            if (_dealerHand.IsBusted || _playerHand.Score > _dealerHand.Score)
+            if (!_playerHand.IsBusted && (_dealerHand.IsBusted || _playerHand.Score > _dealerHand.Score))
             {
-                Console.WriteLine($"Winner! Player has: {_playerHand.Score}. Dealer has: {_dealerHand.Score}.");
+                HandleWin();
             }
             else if (_dealerHand.Score == _playerHand.Score)
             {
-                Console.WriteLine($"Push, dealer and player both have {_dealerHand.Score}.");
+                HandlePush();
             }
             else
             {
-                Console.WriteLine($"Player loses.");
+                HandleLoss();
             }
+
             DisplayHands();
             _isPlaying = false;
         }
         public void Hit()
         {
-            DealPlayerCard();
+            DealCard(ref _playerHand);
             if(_playerHand.IsBusted)
             {
-                Console.WriteLine($"Bust!");
-                DisplayHands();
-                _isPlaying = false;
+                EndHand();
             }
             else if(_playerHand.Score == 21)
             {
@@ -163,7 +158,23 @@ namespace Cards.Games
             {
                 DealerDrawToSeventeen();
             }
-            ShowResults();
+            EndHand();
+        }
+        protected virtual void HandleWin()
+        {
+            Console.WriteLine($"Winner! Player has: {_playerHand.Score}. Dealer has: {_dealerHand.Score}.");
+        }
+        protected virtual void HandleInsuranceWin()
+        {
+            Console.WriteLine("Dealer had blackjack. Player wins 2 to 1 on the insurance bet.");
+        }
+        protected virtual void HandlePush()
+        {
+            Console.WriteLine($"Push, dealer and player both have {_dealerHand.Score}.");
+        }
+        protected virtual void HandleLoss()
+        {
+            Console.WriteLine($"Player loses.");
         }
     }
 }
