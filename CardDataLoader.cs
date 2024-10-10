@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Cards
 {
-    public class DataLoader
+    public class CardDataLoader
     {
         private List<Card>? _defaultDeck = null;
         public List<Card> DefaultDeck
